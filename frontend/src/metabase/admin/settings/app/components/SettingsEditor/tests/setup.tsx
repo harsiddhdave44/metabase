@@ -12,8 +12,12 @@ import {
   setupSettingsEndpoints,
 } from "__support__/server-mocks";
 import { mockSettings } from "__support__/settings";
-import { renderWithProviders } from "__support__/ui";
+import { renderWithProviders, screen, waitFor } from "__support__/ui";
 import SettingsEditor from "../SettingsEditor";
+
+export const FULL_APP_EMBEDDING_URL =
+  "/admin/settings/embedding-in-other-applications/full-app";
+export const EMAIL_URL = "/admin/settings/email";
 
 export interface SetupOpts {
   initialRoute?: string;
@@ -23,7 +27,7 @@ export interface SetupOpts {
   hasEnterprisePlugins?: boolean;
 }
 
-export const setup = ({
+export const setup = async ({
   initialRoute = "/admin/settings",
   settings = [],
   settingValues = createMockSettings(),
@@ -55,4 +59,6 @@ export const setup = ({
       initialRoute,
     },
   );
+
+  await waitFor(() => screen.getByText(/general/i));
 };
