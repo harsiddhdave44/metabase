@@ -53,6 +53,16 @@ describe("Filter", () => {
           createdAtFilter("=", "week", "2026-10-04").displayName(),
         ).toEqual("Created At is October 4–10, 2026");
       });
+      it("should display between dates filter with undefined temporal unit as day range", () => {
+        expect(
+          createdAtFilter(
+            "between",
+            undefined,
+            "2026-10-04",
+            "2026-10-11",
+          ).displayName(),
+        ).toEqual("Created At is October 4–11, 2026");
+      });
       it("should display between-weeks filter as day range", () => {
         expect(
           createdAtFilter(

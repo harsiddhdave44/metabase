@@ -65,10 +65,10 @@ export default class Filter extends MBQLClause {
 
   betterDateLabel() {
     const args = this.arguments();
-    if (!args.every(arg => typeof arg === "string")) {
+    if (!args.every(arg => typeof arg === "string" && moment(arg).isValid())) {
       return undefined;
     }
-    const unit = this.dimension()?.temporalUnit();
+    const unit = this.dimension()?.temporalUnit() ?? "day";
     const isSupportedDateRangeUnit = [
       "day",
       "week",
