@@ -145,8 +145,8 @@ type Props = {
 const DatePicker: React.FC<Props> = props => {
   const {
     className,
-    dateShortcutOptions,
     filter,
+    dateShortcutOptions,
     onFilterChange,
     disableOperatorSelection,
     disableChangingDimension,
