@@ -76,6 +76,7 @@ export default function FilterPopover({
   onResize,
   onClose,
 }: Props) {
+  // Sometimes we have to convert the filter to something that the DatePicker can display.
   const filterForPicker = useMemo(
     () =>
       filterProp instanceof Filter ? filterProp.toDatePickerFilter() : null,
