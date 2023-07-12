@@ -16,6 +16,8 @@ import { parseTimestamp } from "metabase/lib/time";
 import { isExpression } from "metabase-lib/expressions";
 import { getFilterArgumentFormatOptions } from "metabase-lib/operators/utils";
 import {
+  DATE_FORMAT,
+  DATE_TIME_FORMAT,
   generateTimeFilterValuesDescriptions,
   getRelativeDatetimeField,
   isStartingFrom,
@@ -132,17 +134,14 @@ export default class Filter extends MBQLClause {
       return this;
     }
 
-    // NOTE: These have to match the same constants found in query-time.js,
-    //       otherwise SpecificDatePicker will ignore it.
-    const DATE_FORMAT = "YYYY-MM-DD";
-    const DATE_TIME_FORMAT = "YYYY-MM-DDTHH:mm:ss";
-
     const op = this.operatorName();
     const dim = this.dimension();
     const unit = dim?.temporalUnit() ?? "day";
     const TIME_UNITS = ["minute", "hour"];
     const COARSE_UNITS = ["week", "month", "quarter", "year"];
 
+    // NOTE: All date args have to match the format constants found in query-time.js,
+    //       DATE_FORMAT or DATE_TIME_FORMAT, otherwise SpecificDatePicker will not display it.
     if (unit === "day") {
       return this.set([
         op,
