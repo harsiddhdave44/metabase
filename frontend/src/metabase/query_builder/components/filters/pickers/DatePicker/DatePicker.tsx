@@ -146,6 +146,7 @@ const DatePicker: React.FC<Props> = props => {
   const {
     className,
     dateShortcutOptions,
+    filter,
     onFilterChange,
     disableOperatorSelection,
     disableChangingDimension,
@@ -156,11 +157,6 @@ const DatePicker: React.FC<Props> = props => {
     hideTimeSelectors,
     operators = DATE_OPERATORS,
   } = props;
-
-  const filter = React.useMemo(
-    () => props.filter.toDatePickerFilter(),
-    [props.filter],
-  );
 
   const operator = getOperator(filter, operators);
   const [showShortcuts, setShowShortcuts] = React.useState(

@@ -123,7 +123,7 @@ export default class Filter extends MBQLClause {
   }
 
   /**
-   * Tries to return a DatePicker-compatible version of this filter, otherwise returns self,
+   * Tries to return a DatePicker-compatible version of this filter, otherwise returns itself,
    * because DatePicker cannot currently handle coarse units, so we convert them to day units instead.
    */
   toDatePickerFilter() {
@@ -146,13 +146,13 @@ export default class Filter extends MBQLClause {
     if (unit === "day") {
       return this.set([
         op,
-        dim,
+        dim.mbql(),
         ...args.map(d => parseTimestamp(d, unit).format(DATE_FORMAT)),
       ]);
     } else if (TIME_UNITS.includes(unit)) {
       return this.set([
         op,
-        dim,
+        dim.mbql(),
         ...args.map(d => parseTimestamp(d, unit).format(DATE_TIME_FORMAT)),
       ]);
     } else if (COARSE_UNITS.includes(unit)) {
@@ -164,8 +164,11 @@ export default class Filter extends MBQLClause {
         "<": [start],
         ">": [end],
       }[dayOp];
-      const mbql = [dayOp, dayDim, ...dayArgs.map(d => d.format(DATE_FORMAT))];
-      return this.set(mbql);
+      return this.set([
+        dayOp,
+        dayDim.mbql(),
+        ...dayArgs.map(d => d.format(DATE_FORMAT)),
+      ]);
     }
     return this;
   }
