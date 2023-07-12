@@ -81,5 +81,17 @@ describe("SettingsEditor", () => {
         await screen.findByText("We're a little lost..."),
       ).toBeInTheDocument();
     });
+
+    it("shows session timeout option", async () => {
+      setupEnterprise({
+        initialRoute: "/admin/settings/authentication",
+      });
+
+      expect(
+        await screen.findByText("Sign in with Google"),
+      ).toBeInTheDocument();
+
+      expect(screen.queryByText("Session timeout")).not.toBeInTheDocument();
+    });
   });
 });
