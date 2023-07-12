@@ -1,4 +1,4 @@
-import moment from "moment-timezone";
+import moment, { Moment } from "moment-timezone";
 
 import { parseTimestamp } from "metabase/lib/time";
 import type { DatetimeUnit } from "metabase-types/api/query";
@@ -160,8 +160,11 @@ export function formatDateTimeRangeWithUnit(
     unit,
     options,
   );
-  if (!start.isValid() || !end.isValid()) {
+  if (shift === undefined) {
     return String(start);
+  } else if (!start.isValid() || !end.isValid()) {
+    // TODO: when is this used?
+    return formatWeek(start, options);
   }
 
   // Tooltips should show full month name, but condense "MMMM D, YYYY - MMMM D, YYYY" to "MMMM D - D, YYYY" etc
@@ -237,6 +240,38 @@ export function formatRange(
     );
   } else {
     return `${start}  ${EN_DASH}  ${end}`;
+  }
+}
+
+function formatWeek(m: Moment, options: OptionsType = {}) {
+  return formatMajorMinor(m.format("wo"), m.format("gggg"), options);
+}
+
+function formatMajorMinor(
+  major: string,
+  minor: string,
+  options: OptionsType = {},
+) {
+  options = {
+    jsx: false,
+    majorWidth: 3,
+    ...options,
+  };
+  if (options.jsx) {
+    return (
+      <span>
+        <span
+          style={{ minWidth: options.majorWidth + "em" }}
+          className="inline-block text-right text-bold"
+        >
+          {major}
+        </span>
+        {" - "}
+        <span>{minor}</span>
+      </span>
+    );
+  } else {
+    return `${major} - ${minor}`;
   }
 }
 
