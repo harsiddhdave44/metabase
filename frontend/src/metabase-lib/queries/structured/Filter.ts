@@ -87,11 +87,16 @@ export default class Filter extends MBQLClause {
     }
     const sliceFormat = {
       // modified from DEFAULT_DATE_FORMATS in date.tsx to show extra context
-      "hour-of-day": "[hour] H",
+      //
+      // TODO: add friendlier labels for:
+      //   minute-of-hour: like “nth minute of the hour” or “minute :32”
+      //   hour-of-day:    like “nth hour of the day”    or “11:00–11:59PM” or “11:00–59 PM”
+      //   (we can use moment.localeData().ordinal(n) to get an ordinalized number, e.g. 16th or 23rd)
       "minute-of-hour": "[minute] m",
-      "day-of-month": "Do [day of month]",
-      "day-of-year": "DDDo [day of year]",
-      "week-of-year": "wo [week of year]",
+      "hour-of-day": "[hour] H",
+      "day-of-month": "Do [day of the month]",
+      "day-of-year": "DDDo [day of the year]",
+      "week-of-year": "wo [week of the year]",
     }[unit];
     const m = moment(args[0]);
     if (op === "=" && sliceFormat && m.isValid()) {
