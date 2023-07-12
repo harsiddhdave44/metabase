@@ -73,6 +73,7 @@ PLUGIN_ADMIN_SETTINGS_UPDATES.push(sections =>
 PLUGIN_ADMIN_SETTINGS_UPDATES.push(sections => ({
   ...sections,
   "authentication/saml": {
+    getHidden: () => !hasPremiumFeature("sso"),
     component: SettingsSAMLForm,
     settings: [
       {
@@ -159,6 +160,7 @@ PLUGIN_ADMIN_SETTINGS_UPDATES.push(sections => ({
   },
   "authentication/jwt": {
     component: SettingsJWTForm,
+    getHidden: () => !hasPremiumFeature("sso"),
     settings: [
       {
         key: "jwt-enabled",
@@ -241,27 +243,29 @@ PLUGIN_IS_PASSWORD_USER.push(
     MetabaseSettings.isPasswordLoginEnabled(),
 );
 
-PLUGIN_ADMIN_SETTINGS_UPDATES.push(sections =>
-  updateIn(sections, ["authentication/ldap", "settings"], settings => [
-    ...settings,
-    {
-      key: "ldap-group-membership-filter",
-      display_name: t`Group membership filter`,
-      type: "string",
-      validations: [
-        value =>
-          (value.match(/\(/g) || []).length !==
-          (value.match(/\)/g) || []).length
-            ? t`Check your parentheses`
-            : null,
-      ],
-    },
-    {
-      key: "ldap-sync-admin-group",
-      display_name: t`Sync Administrator group`,
-      type: "boolean",
-    },
-  ]),
-);
+if (hasPremiumFeature("sso")) {
+  PLUGIN_ADMIN_SETTINGS_UPDATES.push(sections =>
+    updateIn(sections, ["authentication/ldap", "settings"], settings => [
+      ...settings,
+      {
+        key: "ldap-group-membership-filter",
+        display_name: t`Group membership filter`,
+        type: "string",
+        validations: [
+          value =>
+            (value.match(/\(/g) || []).length !==
+            (value.match(/\)/g) || []).length
+              ? t`Check your parentheses`
+              : null,
+        ],
+      },
+      {
+        key: "ldap-sync-admin-group",
+        display_name: t`Sync Administrator group`,
+        type: "boolean",
+      },
+    ]),
+  );
+}
 
 PLUGIN_REDUX_MIDDLEWARES.push(createSessionMiddleware([LOGIN, LOGIN_GOOGLE]));

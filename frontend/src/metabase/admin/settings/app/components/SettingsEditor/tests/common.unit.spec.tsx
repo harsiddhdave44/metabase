@@ -20,4 +20,48 @@ describe("SettingsEditor", () => {
       expect(screen.queryByText("Authorized origins")).not.toBeInTheDocument();
     });
   });
+
+  describe("authentication settings", function () {
+    it("should not show JWT and SAML auth options", async () => {
+      setup({ initialRoute: "/admin/settings/authentication" });
+
+      expect(
+        await screen.findByText("Sign in with Google"),
+      ).toBeInTheDocument();
+
+      expect(screen.queryByText("SAML")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Allows users to login via a SAML Identity Provider.",
+        ),
+      ).not.toBeInTheDocument();
+
+      expect(screen.queryByText("JWT")).not.toBeInTheDocument();
+      expect(
+        screen.queryByText(
+          "Allows users to login via a JWT Identity Provider.",
+        ),
+      ).not.toBeInTheDocument();
+    });
+
+    it("should not let users access JWT settings", async () => {
+      setup({
+        initialRoute: "/admin/settings/authentication/jwt",
+      });
+
+      expect(
+        await screen.findByText("We're a little lost..."),
+      ).toBeInTheDocument();
+    });
+
+    it("should not let users access SAML settings", async () => {
+      setup({
+        initialRoute: "/admin/settings/authentication/saml",
+      });
+
+      expect(
+        await screen.findByText("We're a little lost..."),
+      ).toBeInTheDocument();
+    });
+  });
 });
