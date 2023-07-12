@@ -8,7 +8,11 @@ import type {
   FieldFilter,
   FieldReference,
 } from "metabase-types/api";
-import { formatDateTimeRangeWithUnit } from "metabase/lib/formatting/date";
+import {
+  formatDateTimeRangeWithUnit,
+  normalizeDateTimeRangeWithUnit,
+} from "metabase/lib/formatting/date";
+import { parseTimestamp } from "metabase/lib/time";
 import { isExpression } from "metabase-lib/expressions";
 import { getFilterArgumentFormatOptions } from "metabase-lib/operators/utils";
 import {
@@ -63,11 +67,25 @@ export default class Filter extends MBQLClause {
     return this._query.removeFilter(this._index);
   }
 
-  betterDateLabel() {
+  /**
+   * Returns an array of arguments if they are all dates.
+   */
+  dateArgs() {
     const args = this.arguments();
-    if (!args.every(arg => typeof arg === "string" && moment(arg).isValid())) {
+    if (args.every(arg => typeof arg === "string" && moment(arg).isValid())) {
+      return args;
+    }
+  }
+
+  /**
+   * Returns a better formatted date label that accounts for ranges of different units.
+   */
+  betterDateLabel() {
+    const args = this.dateArgs();
+    if (!args) {
       return undefined;
     }
+
     const unit = this.dimension()?.temporalUnit() ?? "day";
     const isSupportedDateRangeUnit = [
       "day",
@@ -102,6 +120,54 @@ export default class Filter extends MBQLClause {
     if (op === "=" && sliceFormat && m.isValid()) {
       return m.format(sliceFormat);
     }
+  }
+
+  /**
+   * Tries to return a DatePicker-compatible version of this filter, otherwise returns self,
+   * because DatePicker cannot currently handle coarse units, so we convert them to day units instead.
+   */
+  toDatePickerFilter() {
+    const args = this.dateArgs();
+    if (!args) {
+      return this;
+    }
+
+    // NOTE: These have to match the same constants found in query-time.js,
+    //       otherwise SpecificDatePicker will ignore it.
+    const DATE_FORMAT = "YYYY-MM-DD";
+    const DATE_TIME_FORMAT = "YYYY-MM-DDTHH:mm:ss";
+
+    const op = this.operatorName();
+    const dim = this.dimension();
+    const unit = dim?.temporalUnit() ?? "day";
+    const TIME_UNITS = ["minute", "hour"];
+    const COARSE_UNITS = ["week", "month", "quarter", "year"];
+
+    if (unit === "day") {
+      return this.set([
+        op,
+        dim,
+        ...args.map(d => parseTimestamp(d, unit).format(DATE_FORMAT)),
+      ]);
+    } else if (TIME_UNITS.includes(unit)) {
+      return this.set([
+        op,
+        dim,
+        ...args.map(d => parseTimestamp(d, unit).format(DATE_TIME_FORMAT)),
+      ]);
+    } else if (COARSE_UNITS.includes(unit)) {
+      const dayOp = op === "=" ? "between" : op; // e.g. equal-week/month/quarter/year is always between-days
+      const dayDim = dim?.withTemporalUnit("day");
+      const [start, end] = normalizeDateTimeRangeWithUnit(args, unit);
+      const dayArgs = {
+        between: [start, end],
+        "<": [start],
+        ">": [end],
+      }[dayOp];
+      const mbql = [dayOp, dayDim, ...dayArgs.map(d => d.format(DATE_FORMAT))];
+      return this.set(mbql);
+    }
+    return this;
   }
 
   /**

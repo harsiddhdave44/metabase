@@ -142,15 +142,6 @@ type Props = {
   onFilterChange: (filter: any[]) => void;
 };
 
-// Our current DatePicker cannot handle coarse units, so we convert them to day units instead.
-function displayableFilter(filter: Filter) {
-  // TODO: if temporalUnit is week, month, quarter, or year,
-  //       return an equivalent filter with temporalUnit = day
-  // TODO: if temporalUnit = day, ensure that the values are formatted as YYYY-MM-DD (with times stripped)
-  //       otherwise, SpecificDatePicker will not correctly initialize its text fields
-  return filter;
-}
-
 const DatePicker: React.FC<Props> = props => {
   const {
     className,
@@ -167,11 +158,11 @@ const DatePicker: React.FC<Props> = props => {
   } = props;
 
   const filter = React.useMemo(
-    () => displayableFilter(props.filter),
+    () => props.filter.toDatePickerFilter(),
     [props.filter],
   );
 
-  const operator = getOperator(props.filter, operators);
+  const operator = getOperator(filter, operators);
   const [showShortcuts, setShowShortcuts] = React.useState(
     !operator && !disableOperatorSelection,
   );

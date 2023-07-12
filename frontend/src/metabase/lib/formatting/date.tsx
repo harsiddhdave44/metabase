@@ -1,4 +1,4 @@
-import moment, { Moment } from "moment-timezone";
+import moment from "moment-timezone";
 
 import { parseTimestamp } from "metabase/lib/time";
 import type { DatetimeUnit } from "metabase-types/api/query";
@@ -127,8 +127,7 @@ export function formatDateTimeForParameter(value: string, unit: DatetimeUnit) {
 
 type DateVal = string | number;
 
-/** This formats a time with unit as a date range */
-export function formatDateTimeRangeWithUnit(
+export function normalizeDateTimeRangeWithUnit(
   value: DateVal | [DateVal] | [DateVal, DateVal],
   unit: DatetimeUnit,
   options: OptionsType = {},
@@ -138,7 +137,7 @@ export function formatDateTimeRangeWithUnit(
     parseTimestamp(d, unit, options.local),
   );
   if (!a.isValid() || !b.isValid()) {
-    return String(a);
+    return [a, b];
   }
 
   // The client's unit boundaries might not line up with the data returned from the server.
@@ -147,10 +146,22 @@ export function formatDateTimeRangeWithUnit(
   const end = b.clone().endOf(unit);
   const shift = a.diff(start, "days");
   [start, end].forEach(d => d.add(shift, "days"));
+  return [start, end, shift];
+}
 
+/** This formats a time with unit as a date range */
+export function formatDateTimeRangeWithUnit(
+  value: DateVal | [DateVal] | [DateVal, DateVal],
+  unit: DatetimeUnit,
+  options: OptionsType = {},
+) {
+  const [start, end, shift] = normalizeDateTimeRangeWithUnit(
+    value,
+    unit,
+    options,
+  );
   if (!start.isValid() || !end.isValid()) {
-    // TODO: when is this used?
-    return formatWeek(a, options);
+    return String(start);
   }
 
   // Tooltips should show full month name, but condense "MMMM D, YYYY - MMMM D, YYYY" to "MMMM D - D, YYYY" etc
@@ -226,38 +237,6 @@ export function formatRange(
     );
   } else {
     return `${start}  ${EN_DASH}  ${end}`;
-  }
-}
-
-function formatWeek(m: Moment, options: OptionsType = {}) {
-  return formatMajorMinor(m.format("wo"), m.format("gggg"), options);
-}
-
-function formatMajorMinor(
-  major: string,
-  minor: string,
-  options: OptionsType = {},
-) {
-  options = {
-    jsx: false,
-    majorWidth: 3,
-    ...options,
-  };
-  if (options.jsx) {
-    return (
-      <span>
-        <span
-          style={{ minWidth: options.majorWidth + "em" }}
-          className="inline-block text-right text-bold"
-        >
-          {major}
-        </span>
-        {" - "}
-        <span>{minor}</span>
-      </span>
-    );
-  } else {
-    return `${major} - ${minor}`;
   }
 }
 
