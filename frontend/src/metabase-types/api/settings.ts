@@ -142,6 +142,7 @@ export interface TokenFeatures {
   advanced_permissions: boolean;
   audit_app: boolean;
   content_management: boolean;
+  email_allow_list: boolean;
   embedding: boolean;
   hosting: boolean;
   sandboxes: boolean;
