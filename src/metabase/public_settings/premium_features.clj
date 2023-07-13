@@ -284,6 +284,10 @@
   "Should we enable the Audit Logs interface in the Admin UI?"
   :audit-app)
 
+(define-premium-feature enable-email-allow-list?
+  "Should we enable allow-lists for email domains?"
+  :email-allow-list)
+
 (define-premium-feature enable-sandboxes?
   "Should we enable data sandboxes (row-level permissions)?"
   :sandboxes)
@@ -296,6 +300,7 @@
   "Can we password login?"
   :disable-password-login)
 
+;; TODO: remove this once all its uses have been switched to new granular features
 (define-premium-feature ^{:added "0.41.0"} enable-advanced-config?
   "Should we enable knobs and levers for more complex orgs (granular caching controls, allow-lists email domains for
   notifications, more in the future)?"
