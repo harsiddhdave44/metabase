@@ -143,8 +143,10 @@ export interface TokenFeatures {
   audit_app: boolean;
   cache_granular_controls: boolean;
   content_verification: boolean;
+  disable_password_login: boolean;
   embedding: boolean;
   hosting: boolean;
+  official_collections: boolean;
   sandboxes: boolean;
   snippet_collections: boolean;
   sso: boolean;
