@@ -106,6 +106,86 @@ describe("Filter", () => {
       });
     });
   });
+  describe("toDatePickerFilter", () => {
+    it("should convert day filter args to YYYY-MM-DD (for SpecificDatePicker)", () => {
+      expect(
+        filter([
+          "=",
+          ["field", ORDERS.CREATED_AT, dateType()],
+          "2024-02-16T00:00:00-06:00",
+        ])
+          .toDatePickerFilter()
+          .raw(),
+      ).toEqual([
+        "=",
+        ["field", ORDERS.CREATED_AT, dateType("day")],
+        "2024-02-16",
+      ]);
+    });
+    it("should convert between-weeks filter to day range filter", () => {
+      expect(
+        filter([
+          "between",
+          ["field", ORDERS.CREATED_AT, dateType("week")],
+          "2026-10-04",
+          "2026-10-11",
+        ])
+          .toDatePickerFilter()
+          .raw(),
+      ).toEqual([
+        "between",
+        ["field", ORDERS.CREATED_AT, dateType("day")],
+        "2026-10-04",
+        "2026-10-17",
+      ]);
+    });
+    it("should convert is-week filter to day range filter", () => {
+      expect(
+        filter([
+          "=",
+          ["field", ORDERS.CREATED_AT, dateType("week")],
+          "2026-10-04",
+        ])
+          .toDatePickerFilter()
+          .raw(),
+      ).toEqual([
+        "between",
+        ["field", ORDERS.CREATED_AT, dateType("day")],
+        "2026-10-04",
+        "2026-10-10",
+      ]);
+    });
+    it("should convert before-month filter to before-day filter", () => {
+      expect(
+        filter([
+          "<",
+          ["field", ORDERS.CREATED_AT, dateType("month")],
+          "2026-07-01",
+        ])
+          .toDatePickerFilter()
+          .raw(),
+      ).toEqual([
+        "<",
+        ["field", ORDERS.CREATED_AT, dateType("day")],
+        "2026-07-01",
+      ]);
+    });
+    it("should convert after-quarter filter to after-day filter", () => {
+      expect(
+        filter([
+          ">",
+          ["field", ORDERS.CREATED_AT, dateType("quarter")],
+          "2026-07-01",
+        ])
+          .toDatePickerFilter()
+          .raw(),
+      ).toEqual([
+        ">",
+        ["field", ORDERS.CREATED_AT, dateType("day")],
+        "2026-09-30",
+      ]);
+    });
+  });
   describe("isValid", () => {
     describe("with a field filter", () => {
       it("should return true for a field that exists", () => {

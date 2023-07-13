@@ -145,7 +145,7 @@ export default class Filter extends MBQLClause {
     if (unit === "day") {
       return this.set([
         op,
-        dim.mbql(),
+        dim?.withTemporalUnit(unit).mbql(),
         ...args.map(d => parseTimestamp(d, unit).format(DATE_FORMAT)),
       ]);
     } else if (TIME_UNITS.includes(unit)) {
